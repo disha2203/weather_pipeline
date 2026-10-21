@@ -1,0 +1,22 @@
+# Local datasets
+data/*
+!data/.gitkeep
+
+# Python virtual environments
+.venv/
+venv/
+env/
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Environment secrets
+.env
+.env.*
+
+# Google Cloud credentials
+scripts/gcp-key.json
+
+# Local generated files
+*.log
