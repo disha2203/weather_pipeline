@@ -2,6 +2,8 @@ import requests
 import pandas as pd
 import time
 from pathlib import Path
+from google.cloud import bigquery
+from google.oauth2 import service_account
 
 # Project paths
 PROJECT_DIR = Path(__file__).resolve().parent.parent
@@ -9,6 +11,39 @@ POPULATION_FILE = PROJECT_DIR / "data" / "population.csv"
 
 # Open-Meteo API endpoint
 API_URL = "https://api.open-meteo.com/v1/forecast"
+def upload_to_bigquery(dataframe):
+    """Upload cleaned weather data to BigQuery."""
+
+    project_id = "noted-amphora-512320-t4"
+    dataset_id = "global_weather_data"
+    table_id = "current_weather_stats"
+
+    key_path = PROJECT_DIR / "scripts" / "gcp-key.json"
+
+    credentials = service_account.Credentials.from_service_account_file(
+        str(key_path)
+    )
+
+    client = bigquery.Client(
+        project=project_id,
+        credentials=credentials,
+    )
+
+    table_ref = f"{project_id}.{dataset_id}.{table_id}"
+
+    job_config = bigquery.LoadJobConfig(
+        write_disposition=bigquery.WriteDisposition.WRITE_TRUNCATE,
+    )
+
+    job = client.load_table_from_dataframe(
+        dataframe,
+        table_ref,
+        job_config=job_config,
+    )
+
+    job.result()
+
+    print(f"Successfully uploaded {len(dataframe)} rows to {table_ref}")
 
 
 
@@ -152,8 +187,9 @@ def main():
 
     print("\nLocal data pipeline completed successfully.")
 
-    return merged_df
+    upload_to_bigquery(merged_df)
 
+    return merged_df
 
 if __name__ == "__main__":
     cleaned_df = main()

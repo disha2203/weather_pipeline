@@ -16,7 +16,8 @@ __pycache__/
 .env.*
 
 # Google Cloud credentials
-scripts/gcp-key.json
+# Google Cloud credentials
+scripts/gcp-key.json*
 
 # Local generated files
 *.log
