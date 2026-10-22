@@ -169,10 +169,19 @@ def main():
         merged_df["Wind_Speed"], errors="raise"
     ).astype("float64")
 
-    # Convert Celsius to Fahrenheit.
+     # Convert Celsius to Fahrenheit.
     merged_df["Temperature_Fahrenheit"] = (
         merged_df["Temperature"] * 9 / 5 + 32
     ).astype("float64")
+
+    # Categorize temperatures for the Looker Studio dashboard.
+    # Cold: 15°C and below | Mild: above 15°C through 25°C | Hot: above 25°C
+    merged_df["Temperature_Category"] = pd.cut(
+        merged_df["Temperature"],
+        bins=[float("-inf"), 15, 25, float("inf")],
+        labels=["Cold", "Mild", "Hot"],
+        right=True,
+    ).astype("object")
 
     print(f"Rows after cleaning: {len(merged_df)}")
 
@@ -190,6 +199,7 @@ def main():
     upload_to_bigquery(merged_df)
 
     return merged_df
+
 
 if __name__ == "__main__":
     cleaned_df = main()
